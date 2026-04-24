@@ -1,3 +1,4 @@
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -25,6 +26,37 @@ function formatAxisTs(value, spanMs) {
 
 function formatAxisCategory(value, labelMap) {
   return labelMap[value] || value || '';
+}
+
+function extremaForVisibleRange(data, lines, visible) {
+  let maxItem = null;
+  let minItem = null;
+
+  for (const point of data || []) {
+    for (const line of lines) {
+      if (!visible[line.key]) continue;
+      const value = point[line.key];
+      if (!Number.isFinite(value)) continue;
+
+      const candidate = {
+        value,
+        label: point.tooltipLabel || point.label,
+      };
+
+      if (!maxItem || value > maxItem.value) maxItem = candidate;
+      if (!minItem || value < minItem.value) minItem = candidate;
+    }
+  }
+
+  return { maxItem, minItem };
+}
+
+function glowStrokeWidth(line) {
+  return (line.width ?? (line.dash ? 1.8 : 2.6)) + (line.dash ? 2.8 : 4.8);
+}
+
+function glowOpacity(line) {
+  return line.dash ? 0.12 : 0.2;
 }
 
 function OITooltip({ active, payload, label, lines }) {
@@ -109,6 +141,7 @@ export default function OIChart({
   height = 280,
   showBrush = false,
 }) {
+  const [brushRange, setBrushRange] = useState(null);
   const firstTs = data?.[0]?.ts ?? 0;
   const lastTs = data?.[data.length - 1]?.ts ?? firstTs;
   const spanMs = Math.max(0, lastTs - firstTs);
@@ -125,10 +158,46 @@ export default function OIChart({
         : data?.length > 50
           ? Math.ceil(data.length / 6)
           : 0;
+  const visibleData = useMemo(() => {
+    if (!showBrush || !brushRange || !data?.length) return data || [];
+    const start = Math.max(0, brushRange.startIndex ?? 0);
+    const end = Math.min(data.length - 1, brushRange.endIndex ?? data.length - 1);
+    return data.slice(start, end + 1);
+  }, [brushRange, data, showBrush]);
+  const { maxItem, minItem } = useMemo(
+    () => extremaForVisibleRange(visibleData, lines, visible),
+    [lines, visible, visibleData],
+  );
+
+  useEffect(() => {
+    setBrushRange(
+      data?.length
+        ? { startIndex: 0, endIndex: data.length - 1 }
+        : null,
+    );
+  }, [data]);
 
   return (
-    <div>
+    <div className="chart-viewport">
       <Legend lines={lines} visible={visible} onToggle={onToggle} />
+      {maxItem || minItem ? (
+        <div className="chart-extrema">
+          {maxItem ? (
+            <div className="chart-extrema-item top">
+              <span className="chart-extrema-label">visible max</span>
+              <span className="chart-extrema-value">{fmtFull(maxItem.value)}</span>
+              <span className="chart-extrema-meta">{maxItem.label}</span>
+            </div>
+          ) : null}
+          {minItem ? (
+            <div className="chart-extrema-item bottom">
+              <span className="chart-extrema-label">visible min</span>
+              <span className="chart-extrema-value">{fmtFull(minItem.value)}</span>
+              <span className="chart-extrema-meta">{minItem.label}</span>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="skeleton" style={{ height }} />
@@ -175,25 +244,49 @@ export default function OIChart({
 
             {lines.map((line) => (
               visible[line.key] ? (
-                <Line
-                  key={line.key}
-                  type="linear"
-                  dataKey={line.key}
-                  stroke={line.color}
-                  strokeOpacity={line.opacity ?? 1}
-                  strokeWidth={line.width ?? (line.dash ? 1.8 : 2.6)}
-                  strokeDasharray={line.dash || undefined}
-                  dot={false}
-                  activeDot={{ r: 4.5, stroke: line.color, fill: '#0b0f14', strokeWidth: 2 }}
-                  connectNulls
-                  isAnimationActive={data.length < 220}
-                />
+                <Fragment key={line.key}>
+                  <Line
+                    key={`${line.key}-glow`}
+                    type="linear"
+                    dataKey={line.key}
+                    stroke={line.color}
+                    strokeOpacity={glowOpacity(line)}
+                    strokeWidth={glowStrokeWidth(line)}
+                    strokeDasharray={line.dash || undefined}
+                    dot={false}
+                    connectNulls
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    key={line.key}
+                    type="linear"
+                    dataKey={line.key}
+                    stroke={line.color}
+                    strokeOpacity={line.opacity ?? 1}
+                    strokeWidth={line.width ?? (line.dash ? 1.8 : 2.6)}
+                    strokeDasharray={line.dash || undefined}
+                    strokeLinecap="round"
+                    dot={false}
+                    activeDot={{ r: 4.5, stroke: line.color, fill: '#0b0f14', strokeWidth: 2 }}
+                    connectNulls
+                    isAnimationActive={data.length < 220}
+                  />
+                </Fragment>
               ) : null
             ))}
 
             {showBrush && data.length > 10 ? (
               <Brush
                 dataKey={xDataKey}
+                startIndex={brushRange?.startIndex}
+                endIndex={brushRange?.endIndex}
+                onChange={(next) => {
+                  if (!next) return;
+                  setBrushRange({
+                    startIndex: next.startIndex ?? 0,
+                    endIndex: next.endIndex ?? data.length - 1,
+                  });
+                }}
                 tickFormatter={(value) => (
                   useCategoryAxis
                     ? formatAxisCategory(value, labelMap)
