@@ -56,9 +56,13 @@ export default function Header({
       <header className="topbar">
         <div className="topbar-left">
           <div className="brand-mark">OI</div>
-          <div>
-            <div className="brand-title">MOEX OI</div>
-            <div className="brand-subtitle">{ticker1} · {ticker2} · синхронное сравнение</div>
+          <div className="brand-copy">
+            <div className="brand-kicker">Open Interest Observatory</div>
+            <div className="brand-title-row">
+              <div className="brand-title">MOEX OI</div>
+              <div className="brand-route">{ticker1} / {ticker2}</div>
+            </div>
+            <div className="brand-subtitle">Синхронное сравнение позиций и поведения участников по фьючерсам MOEX</div>
           </div>
         </div>
 
