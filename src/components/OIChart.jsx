@@ -23,6 +23,10 @@ function formatAxisTs(value, spanMs) {
   return `${dd}.${mm}`;
 }
 
+function formatAxisCategory(value, labelMap) {
+  return labelMap[value] || value || '';
+}
+
 function OITooltip({ active, payload, label, lines }) {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload ?? {};
@@ -41,7 +45,10 @@ function OITooltip({ active, payload, label, lines }) {
       {visibleLines.map((line) => (
         <div className="chart-tooltip-row" key={line.key}>
           <span className="chart-tooltip-left">
-            <span className={`chart-tooltip-swatch ${line.dash ? 'dashed' : ''}`} style={{ background: line.color, opacity: line.opacity ?? 1 }} />
+            <span
+              className={`chart-tooltip-swatch ${line.dash ? 'dashed' : ''}`}
+              style={{ background: line.color, opacity: line.opacity ?? 1 }}
+            />
             {line.label}
           </span>
           <span className="chart-tooltip-value">{fmtFull(values[line.key])}</span>
@@ -67,7 +74,10 @@ function Legend({ lines, visible, onToggle }) {
             onClick={() => onToggle(line.key)}
             title="Нажми, чтобы скрыть/показать линию"
           >
-            <span className={`legend-line ${line.dash ? 'dashed' : ''}`} style={{ background: line.color, opacity: line.opacity ?? 1 }} />
+            <span
+              className={`legend-line ${line.dash ? 'dashed' : ''}`}
+              style={{ background: line.color, opacity: line.opacity ?? 1 }}
+            />
             <span>{line.direction}</span>
           </button>
         ))}
@@ -89,11 +99,32 @@ function Legend({ lines, visible, onToggle }) {
   );
 }
 
-export default function OIChart({ data, lines, visible, onToggle, loading, syncId, height = 280, showBrush = false }) {
+export default function OIChart({
+  data,
+  lines,
+  visible,
+  onToggle,
+  loading,
+  syncId,
+  height = 280,
+  showBrush = false,
+}) {
   const firstTs = data?.[0]?.ts ?? 0;
   const lastTs = data?.[data.length - 1]?.ts ?? firstTs;
   const spanMs = Math.max(0, lastTs - firstTs);
-  const xInterval = data?.length > 260 ? Math.ceil(data.length / 8) : data?.length > 120 ? Math.ceil(data.length / 7) : data?.length > 50 ? Math.ceil(data.length / 6) : 0;
+  const useCategoryAxis = data?.some((point) =>
+    /\d{2}:\d{2}/.test(point?.tooltipLabel || point?.key || ''),
+  );
+  const xDataKey = useCategoryAxis ? 'key' : 'ts';
+  const labelMap = Object.fromEntries((data || []).map((point) => [point.key, point.label]));
+  const xInterval =
+    data?.length > 260
+      ? Math.ceil(data.length / 8)
+      : data?.length > 120
+        ? Math.ceil(data.length / 7)
+        : data?.length > 50
+          ? Math.ceil(data.length / 6)
+          : 0;
 
   return (
     <div>
@@ -105,14 +136,23 @@ export default function OIChart({ data, lines, visible, onToggle, loading, syncI
         <div className="empty-chart" style={{ height }}>Нет данных</div>
       ) : (
         <ResponsiveContainer width="100%" height={height}>
-          <ComposedChart data={data} syncId={syncId} syncMethod="value" margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+          <ComposedChart
+            data={data}
+            syncId={syncId}
+            syncMethod="value"
+            margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
+          >
             <CartesianGrid stroke="#202835" vertical strokeOpacity={0.28} strokeDasharray="2 7" />
             <XAxis
-              dataKey="ts"
-              type="number"
-              domain={['dataMin', 'dataMax']}
-              scale="time"
-              tickFormatter={(v) => formatAxisTs(v, spanMs)}
+              dataKey={xDataKey}
+              type={useCategoryAxis ? 'category' : 'number'}
+              domain={useCategoryAxis ? undefined : ['dataMin', 'dataMax']}
+              scale={useCategoryAxis ? undefined : 'time'}
+              tickFormatter={(value) => (
+                useCategoryAxis
+                  ? formatAxisCategory(value, labelMap)
+                  : formatAxisTs(value, spanMs)
+              )}
               tick={{ fill: '#858f9e', fontSize: 11 }}
               tickLine={false}
               axisLine={false}
@@ -133,25 +173,32 @@ export default function OIChart({ data, lines, visible, onToggle, loading, syncI
               isAnimationActive={false}
             />
 
-            {lines.map((line) => visible[line.key] ? (
-              <Line
-                key={line.key}
-                type="linear"
-                dataKey={line.key}
-                stroke={line.color}
-                strokeOpacity={line.opacity ?? 1}
-                strokeWidth={line.width ?? (line.dash ? 1.8 : 2.6)}
-                strokeDasharray={line.dash || undefined}
-                dot={false}
-                activeDot={{ r: 4.5, stroke: line.color, fill: '#0b0f14', strokeWidth: 2 }}
-                connectNulls
-                isAnimationActive={data.length < 220}
-              />
-            ) : null)}
+            {lines.map((line) => (
+              visible[line.key] ? (
+                <Line
+                  key={line.key}
+                  type="linear"
+                  dataKey={line.key}
+                  stroke={line.color}
+                  strokeOpacity={line.opacity ?? 1}
+                  strokeWidth={line.width ?? (line.dash ? 1.8 : 2.6)}
+                  strokeDasharray={line.dash || undefined}
+                  dot={false}
+                  activeDot={{ r: 4.5, stroke: line.color, fill: '#0b0f14', strokeWidth: 2 }}
+                  connectNulls
+                  isAnimationActive={data.length < 220}
+                />
+              ) : null
+            ))}
 
             {showBrush && data.length > 10 ? (
               <Brush
-                dataKey="label"
+                dataKey={xDataKey}
+                tickFormatter={(value) => (
+                  useCategoryAxis
+                    ? formatAxisCategory(value, labelMap)
+                    : formatAxisTs(value, spanMs)
+                )}
                 height={28}
                 stroke="#334155"
                 fill="#0f141b"
