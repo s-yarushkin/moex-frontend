@@ -1,61 +1,55 @@
 # MOEX OI Viewer
 
-Чистый viewer для визуального анализа открытого интереса по MOEX FUTOI.
+Веб-интерфейс для визуального анализа открытого интереса по фьючерсам MOEX.
 
-## Что изменено
+## Архитектура
 
-- стартовые инструменты по умолчанию: **NG** и **BR**
-- более спокойный современный интерфейс без визуального шума
-- синхронное наведение и сопоставление графиков через единый `syncId`
-- поддержка API-ключа из настроек и из `.env`
-- live-режим для локального запуска через Vite proxy
+Frontend обращается не напрямую к MOEX, а к backend proxy:
 
-## Быстрый запуск
+- Frontend: React + Vite + Recharts
+- Backend: Render
+- Backend URL: `https://moex-backend.onrender.com`
+
+API-ключ MOEX хранится только на backend. Во frontend ключ не хранится.
+
+## Локальный запуск
 
 ```bash
 npm install
 npm run dev
 ```
 
-Открой адрес из Vite, обычно это:
+Обычно приложение открывается на `http://localhost:5173`.
 
-```bash
-http://localhost:5173
-```
-
-## Как подключить API-ключ
-
-### Вариант 1. Через интерфейс
-
-Открой `Настройки` и вставь Bearer token Algopack.
-
-### Вариант 2. Через `.env`
-
-Создай файл `.env` на основе `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-И заполни:
-
-```bash
-VITE_MOEX_API_KEY=твой_ключ
-```
-
-## Важное ограничение по online-режиму
-
-Для `apim.moex.com` в браузере есть ограничение CORS.
-Поэтому live-режим с ключом надёжно работает:
-
-- при локальном запуске через `npm run dev` благодаря proxy в `vite.config.js`
-- либо через отдельный backend/proxy
-
-Если просто открыть собранный статический сайт без proxy, онлайн-запросы к `apim.moex.com` могут блокироваться браузером.
-
-## Сборка
+## Production-сборка
 
 ```bash
 npm run build
 npm run preview
 ```
+
+По умолчанию frontend использует:
+
+```bash
+VITE_BACKEND_URL=https://moex-backend.onrender.com
+```
+
+## GitHub Pages
+
+В репозитории добавлен workflow для автопубликации через GitHub Pages.
+
+Ожидаемый URL публикации:
+
+```text
+https://s-yarushkin.github.io/moex-frontend/
+```
+
+Если страница ещё не открывается, проверь в GitHub:
+
+1. `Settings` → `Pages`
+2. `Source` → `GitHub Actions`
+3. Дождись завершения workflow `Deploy GitHub Pages` во вкладке `Actions`
+
+## Важно
+
+Статический frontend работает через Render backend proxy. Прямой вызов `apim.moex.com` из GitHub Pages не используется.
