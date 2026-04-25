@@ -64,19 +64,6 @@ export default function Header({
   return (
     <>
       <div className="topbar-stack">
-        <GlobalControls
-          from={from}
-          till={till}
-          preset={preset}
-          interval={interval}
-          onFromChange={onFromChange}
-          onTillChange={onTillChange}
-          onPresetChange={onPresetChange}
-          onIntervalChange={onIntervalChange}
-          onRefresh={onRefresh}
-          loading={loading}
-        />
-
         <header className="topbar">
           <div className="topbar-left">
             <div className="brand-mark">OI</div>
@@ -86,6 +73,21 @@ export default function Header({
                 <div className="brand-route">{ticker1} / {ticker2}</div>
               </div>
             </div>
+          </div>
+
+          <div className="topbar-center">
+            <GlobalControls
+              from={from}
+              till={till}
+              preset={preset}
+              interval={interval}
+              onFromChange={onFromChange}
+              onTillChange={onTillChange}
+              onPresetChange={onPresetChange}
+              onIntervalChange={onIntervalChange}
+              onRefresh={onRefresh}
+              loading={loading}
+            />
           </div>
 
           <div className="topbar-right">
