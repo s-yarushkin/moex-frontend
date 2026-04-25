@@ -57,23 +57,18 @@ export default function Header({
         <div className="topbar-left">
           <div className="brand-mark">OI</div>
           <div className="brand-copy">
-            <div className="brand-kicker">Open Interest Observatory</div>
             <div className="brand-title-row">
               <div className="brand-title">MOEX OI</div>
               <div className="brand-route">{ticker1} / {ticker2}</div>
             </div>
-            <div className="brand-subtitle">Синхронное сравнение позиций и поведения участников по фьючерсам MOEX</div>
           </div>
         </div>
 
-        <div className="topbar-center">
+        <div className="topbar-right">
           <button className="status-pill" onClick={() => setDrawerOpen((v) => !v)}>
             <span className={`status-dot ${status}`} />
             <span>{STATUS_LABEL[status]}</span>
           </button>
-        </div>
-
-        <div className="topbar-right">
           <button className={`live-pill ${liveMode ? 'on' : ''}`} onClick={onToggleLive}>
             <span className="live-dot" />
             {liveMode ? `LIVE ${mm}:${ss}` : 'LIVE OFF'}
