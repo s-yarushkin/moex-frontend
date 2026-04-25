@@ -1,0 +1,99 @@
+.topbar-stack {
+  display: block;
+}
+
+.topbar {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  padding: 8px 12px;
+}
+
+.topbar-left,
+.topbar-center,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.topbar-center {
+  min-width: 0;
+  justify-content: center;
+}
+
+.topbar-right {
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.status-pill,
+.live-pill,
+.ghost-button,
+.primary-button {
+  min-height: 32px;
+  padding: 0 11px;
+}
+
+.status-pill {
+  min-width: 176px;
+}
+
+.controls-bar-inline {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.controls-bar-inline::before {
+  display: none;
+}
+
+.controls-bar-inline .controls-main {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.controls-bar-inline .control-group-inline,
+.controls-bar-inline .date-range-inline {
+  padding: 4px 7px;
+}
+
+.controls-bar-inline .preset-tab,
+.controls-bar-inline .segment-btn,
+.controls-bar-inline .tf-btn,
+.controls-bar-inline .csv-btn,
+.controls-bar-inline .pg-btn {
+  min-height: 28px;
+  padding: 0 9px;
+}
+
+.controls-bar-inline .date-input,
+.controls-bar-inline .form-input {
+  min-height: 30px;
+  padding: 0 9px;
+}
+
+.controls-bar-inline .refresh-button {
+  min-width: 104px;
+}
+
+@media (max-width: 1320px) {
+  .topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar-right {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 1040px) {
+  .controls-bar-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
