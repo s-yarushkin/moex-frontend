@@ -64,6 +64,19 @@ export default function Header({
   return (
     <>
       <div className="topbar-stack">
+        <GlobalControls
+          from={from}
+          till={till}
+          preset={preset}
+          interval={interval}
+          onFromChange={onFromChange}
+          onTillChange={onTillChange}
+          onPresetChange={onPresetChange}
+          onIntervalChange={onIntervalChange}
+          onRefresh={onRefresh}
+          loading={loading}
+        />
+
         <header className="topbar">
           <div className="topbar-left">
             <div className="brand-mark">OI</div>
@@ -87,19 +100,6 @@ export default function Header({
             <button className="ghost-button" onClick={onSettingsOpen}>Настройки</button>
           </div>
         </header>
-
-        <GlobalControls
-          from={from}
-          till={till}
-          preset={preset}
-          interval={interval}
-          onFromChange={onFromChange}
-          onTillChange={onTillChange}
-          onPresetChange={onPresetChange}
-          onIntervalChange={onIntervalChange}
-          onRefresh={onRefresh}
-          loading={loading}
-        />
       </div>
 
       <div className={`api-panel ${drawerOpen ? 'open' : ''}`}>
