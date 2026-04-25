@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useLiveCountdown } from '../hooks/useTimer';
+import GlobalControls from './GlobalControls';
 
 function calcStatus(apiLog, loading) {
   if (loading) return 'loading';
@@ -34,6 +35,15 @@ export default function Header({
   loading,
   ticker1,
   ticker2,
+  from,
+  till,
+  preset,
+  interval,
+  onFromChange,
+  onTillChange,
+  onPresetChange,
+  onIntervalChange,
+  onRefresh,
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const countdown = useLiveCountdown(refreshInterval, liveMode, onRefreshFire);
@@ -53,29 +63,44 @@ export default function Header({
 
   return (
     <>
-      <header className="topbar">
-        <div className="topbar-left">
-          <div className="brand-mark">OI</div>
-          <div className="brand-copy">
-            <div className="brand-title-row">
-              <div className="brand-title">MOEX OI</div>
-              <div className="brand-route">{ticker1} / {ticker2}</div>
+      <div className="topbar-stack">
+        <header className="topbar">
+          <div className="topbar-left">
+            <div className="brand-mark">OI</div>
+            <div className="brand-copy">
+              <div className="brand-title-row">
+                <div className="brand-title">MOEX OI</div>
+                <div className="brand-route">{ticker1} / {ticker2}</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="topbar-right">
-          <button className="status-pill" onClick={() => setDrawerOpen((v) => !v)}>
-            <span className={`status-dot ${status}`} />
-            <span>{STATUS_LABEL[status]}</span>
-          </button>
-          <button className={`live-pill ${liveMode ? 'on' : ''}`} onClick={onToggleLive}>
-            <span className="live-dot" />
-            {liveMode ? `LIVE ${mm}:${ss}` : 'LIVE OFF'}
-          </button>
-          <button className="ghost-button" onClick={onSettingsOpen}>Настройки</button>
-        </div>
-      </header>
+          <div className="topbar-right">
+            <button className="status-pill" onClick={() => setDrawerOpen((v) => !v)}>
+              <span className={`status-dot ${status}`} />
+              <span>{STATUS_LABEL[status]}</span>
+            </button>
+            <button className={`live-pill ${liveMode ? 'on' : ''}`} onClick={onToggleLive}>
+              <span className="live-dot" />
+              {liveMode ? `LIVE ${mm}:${ss}` : 'LIVE OFF'}
+            </button>
+            <button className="ghost-button" onClick={onSettingsOpen}>Настройки</button>
+          </div>
+        </header>
+
+        <GlobalControls
+          from={from}
+          till={till}
+          preset={preset}
+          interval={interval}
+          onFromChange={onFromChange}
+          onTillChange={onTillChange}
+          onPresetChange={onPresetChange}
+          onIntervalChange={onIntervalChange}
+          onRefresh={onRefresh}
+          loading={loading}
+        />
+      </div>
 
       <div className={`api-panel ${drawerOpen ? 'open' : ''}`}>
         <div className="api-panel-inner">
@@ -97,7 +122,7 @@ export default function Header({
 
           {apiLog.some((e) => e.status === 'cors') && (
             <div className="api-hint">
-              Для live-доступа с API-ключом запускай проект через <code>npm run dev</code> или через собственный backend proxy.
+              Для live-доступа с API-ключом запускайте проект через <code>npm run dev</code> или через собственный backend proxy.
               При статическом хостинге браузер режет прямые запросы к <code>apim.moex.com</code>.
             </div>
           )}
