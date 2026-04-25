@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Header from './components/Header';
 import Settings from './components/Settings';
-import GlobalControls from './components/GlobalControls';
 import InstrumentPanel from './components/InstrumentPanel';
 import DataTable from './components/DataTable';
 import { fetchFutOI, processRows, getRange, loadSettings, saveSettings, autoIntervalForRange } from './api/moex';
@@ -139,6 +138,23 @@ export default function App() {
         loading={loading}
         ticker1={ticker1}
         ticker2={ticker2}
+        from={customFrom}
+        till={customTill}
+        preset={preset}
+        interval={interval}
+        onFromChange={(value) => {
+          setCustomFrom(value);
+          setPreset('custom');
+          setInterval(autoIntervalForRange(value, customTill, interval));
+        }}
+        onTillChange={(value) => {
+          setCustomTill(value);
+          setPreset('custom');
+          setInterval(autoIntervalForRange(customFrom, value, interval));
+        }}
+        onPresetChange={handlePreset}
+        onIntervalChange={setInterval}
+        onRefresh={loadAll}
       />
 
       {showSettings && (
@@ -150,27 +166,6 @@ export default function App() {
       )}
 
       <main className="page">
-        <GlobalControls
-          from={customFrom}
-          till={customTill}
-          preset={preset}
-          interval={interval}
-          onFromChange={(value) => {
-            setCustomFrom(value);
-            setPreset('custom');
-            setInterval(autoIntervalForRange(value, customTill, interval));
-          }}
-          onTillChange={(value) => {
-            setCustomTill(value);
-            setPreset('custom');
-            setInterval(autoIntervalForRange(customFrom, value, interval));
-          }}
-          onPresetChange={handlePreset}
-          onIntervalChange={setInterval}
-          onRefresh={loadAll}
-          loading={loading}
-        />
-
         <section className="panels-grid">
           <InstrumentPanel
             title="Инструмент 1"
