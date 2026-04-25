@@ -13,8 +13,8 @@ export default function GlobalControls({
   loading,
 }) {
   return (
-    <section className="controls-bar">
-      <div className="controls-main controls-main-wide">
+    <div className="controls-bar controls-bar-inline">
+      <div className="controls-main">
         <div className="control-group-inline">
           <span className="control-caption">Диапазон</span>
           <div className="preset-tabs" role="tablist" aria-label="Диапазон">
@@ -68,6 +68,6 @@ export default function GlobalControls({
         <span className={loading ? 'spin' : ''}>↻</span>
         {loading ? 'Обновление' : 'Обновить'}
       </button>
-    </section>
+    </div>
   );
 }
