@@ -19,6 +19,7 @@ function calcMiniStats(data) {
 export default function InstrumentPanel({ title, ticker, onTickerChange, data, loading, error, syncId }) {
   const [visible, setVisible] = useState(ALL_ON);
   const stats = useMemo(() => calcMiniStats(data), [data]);
+  const instrumentName = TICKERS.find((item) => item.id === ticker)?.name ?? '';
 
   function toggleLine(key) {
     setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -26,21 +27,10 @@ export default function InstrumentPanel({ title, ticker, onTickerChange, data, l
 
   return (
     <section className="instrument-card">
-      <div className="instrument-head">
-        <div className="instrument-main">
-          <div className="instrument-overline">{title}</div>
-          <div className="instrument-line">
-            <select className="ticker-dropdown" value={ticker} onChange={(e) => onTickerChange(e.target.value)}>
-              {TICKERS.map((item) => (
-                <option key={item.id} value={item.id}>{item.id}</option>
-              ))}
-            </select>
-            <span className="instrument-name">{TICKERS.find((item) => item.id === ticker)?.name ?? ''}</span>
-          </div>
-        </div>
-
+      <div className="panel-strip">
+        <div className="panel-strip-label">{title}</div>
         {stats && (
-          <div className="instrument-meta">
+          <div className="panel-strip-meta">
             <div className="mini-kpi">
               <span className="mini-kpi-label">Физ нетто</span>
               <span className={`mini-kpi-value ${stats.fizNet >= 0 ? 'positive' : 'negative'}`}>
@@ -66,7 +56,17 @@ export default function InstrumentPanel({ title, ticker, onTickerChange, data, l
 
       <div className="chart-stack">
         <div className="chart-card">
-          <div className="chart-card-title">Позиции</div>
+          <div className="chart-card-head">
+            <div className="chart-card-title">Позиции</div>
+            <div className="chart-card-instrument">
+              <select className="ticker-dropdown compact" value={ticker} onChange={(e) => onTickerChange(e.target.value)}>
+                {TICKERS.map((item) => (
+                  <option key={item.id} value={item.id}>{item.id}</option>
+                ))}
+              </select>
+              <span className="instrument-name">{instrumentName}</span>
+            </div>
+          </div>
           <OIChart
             data={data}
             lines={CONTRACT_LINES}
