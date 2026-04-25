@@ -28,7 +28,18 @@ export default function InstrumentPanel({ title, ticker, onTickerChange, data, l
   return (
     <section className="instrument-card">
       <div className="panel-strip">
-        <div className="panel-strip-label">{title}</div>
+        <div className="panel-strip-main">
+          <div className="panel-strip-kicker">{title}</div>
+          <div className="panel-strip-instrument">
+            <select className="ticker-dropdown compact" value={ticker} onChange={(e) => onTickerChange(e.target.value)}>
+              {TICKERS.map((item) => (
+                <option key={item.id} value={item.id}>{item.id}</option>
+              ))}
+            </select>
+            <span className="instrument-name">{instrumentName}</span>
+          </div>
+        </div>
+
         {stats && (
           <div className="panel-strip-meta">
             <div className="mini-kpi">
@@ -56,17 +67,7 @@ export default function InstrumentPanel({ title, ticker, onTickerChange, data, l
 
       <div className="chart-stack">
         <div className="chart-card">
-          <div className="chart-card-head">
-            <div className="chart-card-title">Позиции</div>
-            <div className="chart-card-instrument">
-              <select className="ticker-dropdown compact" value={ticker} onChange={(e) => onTickerChange(e.target.value)}>
-                {TICKERS.map((item) => (
-                  <option key={item.id} value={item.id}>{item.id}</option>
-                ))}
-              </select>
-              <span className="instrument-name">{instrumentName}</span>
-            </div>
-          </div>
+          <div className="chart-card-title">Позиции</div>
           <OIChart
             data={data}
             lines={CONTRACT_LINES}
@@ -74,7 +75,7 @@ export default function InstrumentPanel({ title, ticker, onTickerChange, data, l
             onToggle={toggleLine}
             loading={loading}
             syncId={syncId}
-            height={320}
+            height={340}
             showBrush
           />
         </div>
@@ -88,7 +89,7 @@ export default function InstrumentPanel({ title, ticker, onTickerChange, data, l
             onToggle={toggleLine}
             loading={loading}
             syncId={syncId}
-            height={240}
+            height={230}
           />
         </div>
       </div>
